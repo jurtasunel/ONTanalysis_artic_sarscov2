@@ -13,7 +13,7 @@ library(ggplot2)
 args = commandArgs(trailingOnly = TRUE)
 # Print required input file if typed help.
 if (args[1] == "-h" || args[1] == "help"){
-  print("Syntax: Rscript.R depth_file.txt")
+  print("Syntax: Rscript.R consensus_genomes.fasta quality_report.csv")
   q()
   N
 }
