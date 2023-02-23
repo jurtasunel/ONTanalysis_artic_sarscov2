@@ -40,10 +40,12 @@ for (i in 1:length(fasta_file)){
   
   # Save the current ID.
   current_ID <- names(fasta_file)[i]
+  print(current_ID)
   # Get the percentage of N of each sequence and the percente of nt.
   N_perc <- (str_count(fasta_file[[i]], pattern = "N") * 100) / nchar(fasta_file[[i]])
   coverage <- (100 - N_perc)
   nt_perc <- c(nt_perc, coverage)
+  print(nt_perc)
   # Add the current coverage to the coverage column on the quality report row matching the current ID. 
   quality_report[quality_report$prefix_barcode == current_ID, "coverage"] <- coverage
   print(paste0("Coverage of ", current_ID, " = ", coverage))
@@ -58,12 +60,11 @@ for (i in 1:length(fasta_file)){
 # Overwrite the existing quality report with the new one. 
 print("Appending quality report with samples coverage...")
 write.csv(quality_report, "quality_report.csv", row.names = FALSE)
+quality_report
 
 # Make a dataframe to plot the coverage of all IDs
 df_plot_quality <- data.frame(names(fasta_file), nt_perc)
 colnames(df_plot_quality) <- c("ID", "Coverage")
-# Rename the IDs to only retain the barcode and not the identifier.
-for (i in 1:nrow(df_plot_quality)){df_plot_quality$ID[i] <- unlist(strsplit(df_plot_quality$ID[i], "_", fixed = TRUE))[2]}
 
 print("Plotting coverage...")
 # Plot barplot
@@ -74,7 +75,7 @@ quality_plot <- ggplot(df_plot_quality, aes(x = ID, y = Coverage)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   theme(axis.title.y = element_text(),
-        axis.text.y = element_text(size = 9),
+        axis.text.y = element_text(size = 12),
         axis.ticks.y = element_line(),
         axis.title.x = element_text(),
         axis.text.x = element_text(angle = 90, size = 4, )) +
@@ -85,7 +86,7 @@ quality_plot <- ggplot(df_plot_quality, aes(x = ID, y = Coverage)) +
 ggsave("Coverage_barplot", quality_plot, device = "png", dpi = 700, bg = "white")
 
 # Remove sequences of low quality from fasta file and metadata file.
-fasta_file <- fasta_file[! names(fasta_file) %in% low_quality_seqs_ID]
+#fasta_file <- fasta_file[! names(fasta_file) %in% low_quality_seqs_ID]
 
 
 
