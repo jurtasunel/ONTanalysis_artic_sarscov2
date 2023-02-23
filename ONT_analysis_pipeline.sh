@@ -1,5 +1,3 @@
-#!bin/bash
-############################################################################################################################################################
 ### This script runs the artic pipeline to produce a medaka consensus from ONT reads, then calls plot_depth_ONT.R and plot_coverage_ONT.R.               ###
 ### Plot_depth.R takes a depth_txt.file and a quality_report.csv as inputs. Plot_converage.R takes the medaka consensus and the quality_report as input. ###
 ### The scripts should be on the same directory because the Rscripts use previous output files as input arguments.                                       ###
@@ -18,8 +16,8 @@
 # Artic common issues: https://github.com/artic-network/artic-ncov2019/issues
 
 # Define variables for the barcode directories path, the prefix identifier of the analysis and the scripts directory:
-barcode_path="/home/josemari/Desktop/Jose/Projects/ONT_analysis/Data/test_02_02_2023"
-prefix="Test02023023"
+barcode_path="/home/josemari/Desktop/Jose/Tests/ONt_test"
+prefix="NetoVIR_run2"
 Scripts="/home/josemari/Desktop/Jose/Projects/ONT_analysis/Scripts"
 
 # Create a variable named barcode and store the names of the barcode directories. 
@@ -29,6 +27,8 @@ for i in "${!files[@]}"; do # loop throught the names in files.
     filename="$(basename "${files[i]}")" # extract the dir name from the path with basename.
     barcode+=("$filename") # Append it to the barcode array.
 done
+# Print the barcode names
+echo -e "Barcodes: ${barcode[@]}\n"
 
 # Create empty quality report csv file with headers that will be appended during the following iterations.
 echo -e "Creating empty quality_report.csv file...\n"
@@ -51,7 +51,13 @@ samtools depth -a -H ${prefix}_${i}.primertrimmed.rg.sorted.bam -o ${prefix}_${i
 
 # Call the Rscript to generate the depth plot. It will also append the quality report with the current depth and produce a tsv file with the low depth positions.
 echo -e "Calling plot_depth.R...\n" 
-Rscript ${Scripts}/plot_depth_ONT.R `pwd`/${prefix}_${i}_depth.txt `pwd`/quality_report.csv
+Rscript plot_depth_ONT.R `pwd`/${prefix}_${i}_depth.txt `pwd`/quality_report.csv
+
+# Make directory to store results.
+mkdir ${i}_result
+mv ${prefix}_${i}_depth.pdf ${prefix}_${i}_low_depth_positions.csv ${prefix}_${i}.sorted.bam ${prefix}_${i}.merged.vcf ${i}_result
+# Copy the consensus for each barcode instead of moving it from directory because is needed for final coverage plot.
+cp ${prefix}_${i}.consensus.fasta ${i}_result
 
 done
 
@@ -61,18 +67,13 @@ cat *.consensus.fasta > ${prefix}_consensus_genomes.fasta
 
 # Rscript to plot coverage. It will also append the quality report with the coverage of all samples.
 echo -e "Calling plot_coverage.R...\n" 
-Rscript ${Scripts}/plot_coverage_ONT.R `pwd`/${prefix}_consensus_genomes.fasta `pwd`/quality_report.csv
+Rscript plot_coverage_ONT.R `pwd`/${prefix}_consensus_genomes.fasta `pwd`/quality_report.csv
 
-# Make directory to store results.
+# Rename qualiy report and coverage barplot.
+mv quality_report.csv ${prefix}_quality_report.csv
+mv Coverage_barplot ${prefix}_coverage_barplot.png
 
-#mv quality_report.csv ${prefix}_consensus_genomes.fasta *.consensus.fasta *_depth.pdf *_low_depth_positions.txt ${prefix}_(date +"%d-%m-%Y")
-
-
-
-
-
-
-
-
-
-
+# Make directory to store all barcodes and results and remove intermediate files.
+mkdir ${prefix}_result
+mv ${prefix}_quality_report.csv ${prefix}_consensus_genomes.fasta ${prefix}_coverage_barplot.png ${prefix}_result
+rm ${prefix}*
