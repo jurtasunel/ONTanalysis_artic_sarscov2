@@ -1,3 +1,5 @@
+#!bin/bash
+############################################################################################################################################################
 ### This script runs the artic pipeline to produce a medaka consensus from ONT reads, then calls plot_depth_ONT.R and plot_coverage_ONT.R.               ###
 ### Plot_depth.R takes a depth_txt.file and a quality_report.csv as inputs. Plot_converage.R takes the medaka consensus and the quality_report as input. ###
 ### The scripts should be on the same directory because the Rscripts use previous output files as input arguments.                                       ###
@@ -74,6 +76,15 @@ mv quality_report.csv ${prefix}_quality_report.csv
 mv Coverage_barplot ${prefix}_coverage_barplot.png
 
 # Make directory to store all barcodes and results and remove intermediate files.
-mkdir ${prefix}_result
-mv ${prefix}_quality_report.csv ${prefix}_consensus_genomes.fasta ${prefix}_coverage_barplot.png ${prefix}_result
+mkdir ${prefix}_results
+mv ${prefix}_quality_report.csv ${prefix}_consensus_genomes.fasta ${prefix}_coverage_barplot.png ${prefix}_results
 rm ${prefix}*
+
+
+
+
+
+
+
+
+
